@@ -72,7 +72,7 @@ def verify_options(errors, destination, prefix_type, acquired_prefix_id,
         status_code = custom_status_code
     try:
         status_code = int(status_code)
-    except:
+    except Exception:
         errors['status_code'] = ("Please provide a numeric (integer) HTTP "
                                  "response status code!")
 
@@ -260,7 +260,7 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
             prefix = self.aq_acquire(self.acquired_prefix_id)
             if callable(prefix):
                 prefix = prefix()
-            url = prefix + (not(prefix.endswith('/')) and '/' or '') + url
+            url = prefix + (not (prefix.endswith('/')) and '/' or '') + url
         elif prefix_type == 'get_site_url':
             url = self.aq_acquire('get_site_url')() + '/' + url
 
@@ -335,7 +335,7 @@ def add_Detour(self, id, title='', destination='', prefix_type='none',
     if REQUEST is not None:
         try:
             base_url = self.DestinationURL()
-        except:
+        except Exception:
             base_url = REQUEST['URL1']
         REQUEST.RESPONSE.redirect(
             '%s/manage_main?update_menu=1&manage_tabs_message=%s' % (

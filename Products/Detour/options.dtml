@@ -1,0 +1,243 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+
+<p class="form-help">
+  The Detour product redirects calls to another object or URL.
+  With default settings, you only need to specify an id for the object and a destination URL.
+  The default settings are: no prefix, 301 status code and no URL truncatating.
+  Please note, that the destination together with the specified prefix must form a full URL, such as "http://www.example.com".
+</p>
+
+<dtml-let errors="REQUEST.get('errors', {})">
+<form action="&dtml-URL1;" method="post" enctype="multipart/form-data">
+  <table class="form" cellspacing="0" cellpadding="2" border="0">
+
+    <tr class="form-field">
+      <th>
+        <div class="form-label">
+          <label for="destination">Destination</label>
+        </div>
+      </th>
+      <td>
+        <div class="form-element">
+          <div class="form-info">
+            Depending on the selected type of prefix below, you must either specify a full URL, a path or nothing as the destination for the redirect.
+          </div>
+          <input type="string" id="destination" name="destination" value="<dtml-var "REQUEST.form.get('destination', destination)">" size="50" class="fw" placeholder="<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'none'">http://www.example.com<dtml-elif "REQUEST.form.get('prefix_type', prefix_type) == 'acquired_prefix'">path/to/destination<dtml-else>path/to/object</dtml-if>">
+          <dtml-if "errors.has_key('destination')"><div class="error"><dtml-var "errors['destination']"></div></dtml-if>
+        </div>
+      </td>
+    </tr>
+
+    <tr class="form-field">
+      <th>
+        <div class="form-label">
+          <label for="prefix_type_none">Prefix</label>
+        </div>
+      </th>
+      <td>
+        <div class="form-element">
+          <div class="form-info">
+            Please choose one of the following prefix types. If necessary, a slash ("/") will automatically added between prefix and destination.
+          </div>
+          <dtml-if "errors.has_key('prefix_type')"><div class="error"><dtml-var "errors['prefix_type']"></div></dtml-if>
+          <table class="subform" cellspacing="0" cellpadding="2" border="0">
+
+            <tr>
+              <td>
+                <input type="radio" id="prefix_type_none" name="prefix_type" value="none"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'none'"> checked</dtml-if> onclick="document.getElementById('destination').placeholder = 'http://www.example.com';">
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="prefix_type_none">no prefix</label>
+                  <div class="form-info">
+                    Do not prefix the destination, which must be an absolute URL, such as "http://www.example.com".
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="prefix_type_absolute_url" name="prefix_type" value="absolute_url"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'absolute_url'"> checked</dtml-if> onclick="document.getElementById('destination').placeholder = 'path/to/object';">
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="prefix_type_absolute_url" class="form-element">parent's absolute_url method</label>
+                  <div class="form-info">
+                    The parent object's absolute_url method is used as the prefix for the destination, a relative path in the form "path/to/object".
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="prefix_type_acquired_prefix" name="prefix_type" value="acquired_prefix"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'acquired_prefix'"> checked</dtml-if> onclick="document.getElementById('destination').placeholder = 'path/to/destination';">
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="prefix_type_acquired_prefix" class="form-element">acquired prefix:</label>
+                  <input type="string" id="acquired_prefix_id" name="acquired_prefix_id" size="25" value="<dtml-var "REQUEST.form.get('acquired_prefix_id', acquired_prefix_id)">" placeholder="property's or callable's id" />
+                  <div class="form-info">
+                    The specified object is acquired and may be a string or callable object, such as a Python Script, resulting in a URL such as "http://www.example.com/".
+                    The result is used as the prefix for the destination, a relative path in the form "path/to/destination".
+                  </div>
+                  <dtml-if "errors.has_key('acquired_prefix_id')"><div class="error"><dtml-var "errors['acquired_prefix_id']"></div></dtml-if>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="prefix_type_get_site_url" name="prefix_type" value="get_site_url"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'get_site_url'"> checked</dtml-if> onclick="document.getElementById('destination').placeholder = 'path/to/object';">
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="prefix_type_get_site_url" class="form-element">get_site_url method</label>
+                  <div class="form-info">
+                    A callable object named get_site_url, as provided by the WebZite Product, is used as the prefix for the destination, allowing for relative redirects.
+                    The result is used as the prefix for the destination, a relative path in the form "path/to/object".
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </td>
+    </tr>
+
+    <tr class="form-field">
+      <th>
+        <div class="form-optional">
+          <label for="status_code_301">Status Code</label>
+        </div>
+      </th>
+      <td>
+        <div class="form-element">
+          <div class="form-info">
+            The HTTP status code to use with the redirect.
+            For information, please visit the <a target="_blank" href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3">HTTP Status Code Definitions</a> at the W3C website.
+          </div>
+          <dtml-if "errors.has_key('status_code')"><div class="error"><dtml-var "errors['status_code']"></div></dtml-if>
+          <table class="subform" cellspacing="0" cellpadding="2" border="0">
+
+            <tr>
+              <td>
+                <input type="radio" id="status_code_301" name="status_code" value="301"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '301'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="status_code_301">301 Moved Permanently</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="status_code_302" name="status_code" value="302"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '302'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="status_code_302">302 Moved Temporarily</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="status_code_303" name="status_code" value="303"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '303'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="status_code_303">303 See Other</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="status_code_307" name="status_code" value="307"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '307'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="status_code_307">307 Temporary Redirect</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="status_code_custom" name="status_code" value="custom"<dtml-if "REQUEST.form.get('status_code', str( status_code)) == 'custom'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="status_code_custom">Custom Code:</label>
+                  <input class="number" type="string" name="custom_status_code" size="6" value="<dtml-var "REQUEST.form.get('custom_status_code', status_code)">">
+                  <dtml-if "errors.has_key('custom_status_code')"><div class="error"><dtml-var "errors['custom_status_code']"></div></dtml-if>
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </td>
+    </tr>
+
+    <tr class="form-field">
+      <th>
+        <div class="form-optional">
+          <label for="truncate_url_off">Truncate URL</label>
+        </div>
+      </th>
+      <td>
+        <div class="form-element">
+          <div class="form-info">
+            Unless the URL is truncated, any additional paths and attributes of the call to this Detour object are also appended to the destination URL.
+          </div>
+          <dtml-if "errors.has_key('truncate_url')"><div class="error"><dtml-var "errors['truncate_url']"></div></dtml-if>
+          <table class="subform" cellspacing="0" cellpadding="2" border="0">
+
+            <tr>
+              <td>
+                <input type="radio" id="truncate_url_off" name="truncate_url" value="off"<dtml-if "REQUEST.form.get('truncate_url', truncate_url and 'on' or 'off') == 'off'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="truncate_url_off">Do not truncate URL</label>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <input type="radio" id="truncate_url_on" name="truncate_url" value="on"<dtml-if "REQUEST.form.get('truncate_url', truncate_url and 'on' or 'off') == 'on'"> checked</dtml-if>>
+              </td>
+              <td class="fw">
+                <div class="form-element">
+                  <label for="truncate_url_on">Truncate URL and discard traverse_subpath</label>
+                </div>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+      </td>
+    </tr>
+
+    <tr class="form-buttons">
+      <td>&nbsp;</td>
+      <td>
+        <div class="form-element">
+          <input class="form-element" type="submit" name="save_options:method" value="Save Changes" />
+        </div>
+      </td>
+    </tr>
+
+  </table>
+
+</form>
+</dtml-let>
+
+<dtml-var manage_page_footer>

@@ -28,20 +28,29 @@ MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE
 # Imports
 
 
-from urllib import quote_plus
+try:
+    from urllib.parse import quote_plus
+except ImportError:
+    from urllib import quote_plus
 
 from AccessControl import ClassSecurityInfo
 from AccessControl.Permissions import view as view_permission
-from AccessControl.Role import RoleManager
-from Globals import DTMLFile, InitializeClass
+from AccessControl.class_init import InitializeClass
+from App.special_dtml import DTMLFile
+from App.version_txt import getZopeVersion
 from OFS.PropertyManager import PropertyManager
 from OFS.SimpleItem import SimpleItem
 from OFS.History import Historical
+from OFS.role import RoleManager
 
 
 # =============================================================================
 # Definitions
 
+default_status_code = 308
+
+zope_version = getZopeVersion()
+zope_version_major = int(zope_version[0])
 
 prefix_types = ('none', 'acquired_prefix', 'absolute_url', 'get_site_url')
 
@@ -52,8 +61,10 @@ true_values = ('1', 'true', 'on', 'yes')
 # Option Verification
 
 
-def verify_options(errors, destination, prefix_type, acquired_prefix_id,
-                   status_code, custom_status_code, truncate_url):
+def verify_options(
+    errors, destination, prefix_type, acquired_prefix_id, status_code,
+    custom_status_code, truncate_url
+):
     """!!!."""
     #
 
@@ -61,11 +72,11 @@ def verify_options(errors, destination, prefix_type, acquired_prefix_id,
     if prefix_type not in prefix_types:
         errors['prefix_type'] = "Invalid prefix type specified!"
     elif prefix_type == 'none' and not str(destination).strip():
-        errors['destination'] = ("You have to specify a destination for the "
-                                 "redirect!")
+        errors['destination'] = (
+            "You have to specify a destination for the redirect!")
     elif prefix_type == 'acquired_prefix' and not acquired_prefix_id.strip():
-        errors['acquired_prefix_id'] = ("You have to specify a prefix for the "
-                                        "selected prefix type!")
+        errors['acquired_prefix_id'] = (
+            "You have to specify a prefix for the selected prefix type!")
 
     # verify status code
     if status_code == 'custom':
@@ -73,8 +84,8 @@ def verify_options(errors, destination, prefix_type, acquired_prefix_id,
     try:
         status_code = int(status_code)
     except Exception:
-        errors['status_code'] = ("Please provide a numeric (integer) HTTP "
-                                 "response status code!")
+        errors['status_code'] = (
+            "Please provide a numeric (integer) HTTP response status code!")
 
     # verfiy truncate url option
     if truncate_url and str(truncate_url).lower() in true_values:
@@ -97,6 +108,7 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
     # Attributes
 
     meta_type = 'Detour'
+    zmi_icon = 'Detour_icon'
 
     # The following definition is a hack to make Detour work properly with the
     # VirtualHostMonster as it expects a Folder like Product as a destination.
@@ -106,7 +118,7 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
     prefix_types = prefix_types
     prefix_type = 'none'
     prefix = ''
-    status_code = 301
+    status_code = default_status_code
     truncate_url = None
 
     # -------------------------------------------------------------------------
@@ -150,13 +162,15 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
     # ZMI Tabs
 
     manage_options = (
-        {'label': 'Options', 'action': 'options_form'},
-        {'label': 'Test', 'action': 'index_html'},
-    ) +\
-        PropertyManager.manage_options +\
-        Historical.manage_options +\
-        RoleManager.manage_options +\
+        (
+            {'label': 'Options', 'action': 'options_form'},
+            {'label': 'Test', 'action': 'index_html'},
+        ) +
+        PropertyManager.manage_options +
+        Historical.manage_options +
+        RoleManager.manage_options +
         SimpleItem.manage_options
+    )
 
     # -------------------------------------------------------------------------
     # ZMI Find
@@ -170,11 +184,14 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
     # -------------------------------------------------------------------------
     # Options
 
-    options_form = DTMLFile('options', globals())
+    options_form = DTMLFile(
+        'resources/options', globals(), zope_version_major=zope_version_major)
 
-    def save_options(self, destination='', prefix_type='none',
-                     acquired_prefix_id='', status_code=301,
-                     custom_status_code=None, truncate_url=True, REQUEST=None):
+    def save_options(
+        self, destination='', prefix_type='none', acquired_prefix_id='',
+        status_code=default_status_code, custom_status_code=None, truncate_url=True,
+        REQUEST=None
+    ):
         """Save options."""
         #
 
@@ -192,11 +209,12 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
         # handle errors
         if errors.keys():
             if REQUEST is not None:
-                message = ("Your changes could not be saved because there was "
-                           "a problem with your entries.")
-                return self.options_form(client=self, REQUEST=REQUEST,
-                                         errors=errors,
-                                         manage_tabs_message=message)
+                message = (
+                    "Your changes could not be saved because there was a "
+                    "problem with your entries.")
+                return self.options_form(
+                    client=self, REQUEST=REQUEST, errors=errors,
+                    manage_tabs_message=message)
             else:
                 raise ValueError('\n'.join(errors.values()))
 
@@ -214,8 +232,8 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
         # ZMI redirect
         if REQUEST is not None:
             message = 'Changes saved.'
-            return self.options_form(client=self, REQUEST=REQUEST,
-                                     manage_tabs_message=message)
+            return self.options_form(
+                client=self, REQUEST=REQUEST, manage_tabs_message=message)
 
     # -------------------------------------------------------------------------
     # Traversal
@@ -284,27 +302,31 @@ InitializeClass(Detour)
 # Constructor Form
 
 
-add_Detour_form = DTMLFile('add', globals())
+add_Detour_form = DTMLFile(
+    'resources/add', globals(), zope_version_major=zope_version_major)
 
 
 # =============================================================================
 # Constructor Method
 
 
-def add_Detour(self, id, title='', destination='', prefix_type='none',
-               acquired_prefix_id='', status_code=301, custom_status_code=None,
-               truncate_url=True, REQUEST=None):
+def add_Detour(
+    self, id, title='', destination='https://example.com', prefix_type='none',
+    acquired_prefix_id='', status_code=default_status_code, custom_status_code=None,
+    truncate_url=True, base_url=None, REQUEST=None
+):
     """ZMI constructor for Detour."""
-    #
+    # -------------------------------------------------------------------------
+    # prepare
 
     # process parameters
     errors = {}
     id = str(id).strip()
     if not id:
         errors['id'] = "You have to specify an Id for the new object!"
-    errors = verify_options(errors, destination, prefix_type,
-                            acquired_prefix_id, status_code,
-                            custom_status_code, truncate_url)
+    errors = verify_options(
+        errors, destination, prefix_type, acquired_prefix_id, status_code,
+        custom_status_code, truncate_url)
 
     # handle errors
     if errors.keys():
@@ -326,20 +348,32 @@ def add_Detour(self, id, title='', destination='', prefix_type='none',
     # -------------------------------------------------------------------------
     # save options
 
-    instance.save_options(destination, prefix_type, acquired_prefix_id,
-                          status_code, custom_status_code, truncate_url)
+    instance.save_options(
+        destination, prefix_type, acquired_prefix_id, status_code,
+        custom_status_code, truncate_url)
 
     # -------------------------------------------------------------------------
     # ZMI redirect
 
     if REQUEST is not None:
-        try:
-            base_url = self.DestinationURL()
-        except Exception:
-            base_url = REQUEST['URL1']
+        if not base_url:
+            try:
+                base_url = self.DestinationURL() + '/manage_main'
+            except Exception:
+                base_url = REQUEST['URL1'] + '/manage_main'
         REQUEST.RESPONSE.redirect(
-            '%s/manage_main?update_menu=1&manage_tabs_message=%s' % (
+            '%s?update_menu=1&manage_tabs_message=%s' % (
                 base_url,
                 quote_plus(u"""A new Detour with Id "%s" was created""" % id)
             )
         )
+
+
+def add_and_edit_Detour(self, id, title='', REQUEST=None):
+    """ZMI constructor helper for Detour."""
+    id = str(id).strip()
+    try:
+        base_url = self.DestinationURL() + '/%s/options_form' % id
+    except Exception:
+        base_url = REQUEST['URL1'] + '/%s/options_form' % id
+    add_Detour(self, id=id, title=title, base_url=base_url, REQUEST=REQUEST)

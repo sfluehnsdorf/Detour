@@ -1,0 +1,68 @@
+<dtml-var manage_page_header>
+<main class="container-fluid">
+
+<dtml-var "manage_form_title(this(), _, form_title='Add Detour')">
+
+	<p class="form-help alert alert-info">
+		The Detour product redirects calls to another object or URL.
+		With default settings, you only need to specify an id for the object and a destination URL.
+		The default settings are: no prefix, 301 status code and no URL truncatating.
+		Please note, that the destination together with the specified prefix must form a full URL, such as "http://www.example.com".
+	</p>
+
+	<dtml-let errors="REQUEST.get('errors', {})">
+	<form action="&dtml-URL1;" method="post" enctype="multipart/form-data" class="zmi-dtml">
+
+		<div class="form-group row">
+			<label for="id" class="form-label col-sm-3 col-md-2">Id</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="id" class="form-control" type="text" name="id" value="<dtml-var "REQUEST.form.get('id', '')">" />
+				<dtml-if "'id' in errors"><div class="text-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['id']"></div></dtml-if>
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="title" class="form-label col-sm-3 col-md-2">Title</label>
+			<div class="col-sm-9 col-md-10">
+				<input id="title" class="form-control" type="text" name="title" value="<dtml-var "REQUEST.form.get('title', '')">" />
+			</div>
+		</div>
+
+		<div class="zmi-controls">
+			<input
+				class="form-element default"
+				name="add_and_edit_Detour:default_method"
+				type="submit"
+				value="Add &amp; Edit Detour" />
+			<input
+				class="form-element default"
+				name="add_Detour:method"
+				type="submit"
+				value="Add Detour" />
+			<input
+				class="form-element"
+				name="manage_main:method"
+				type="submit"
+				value="Cancel" />
+		</div>
+
+	</form>
+	</dtml-let>
+
+<style>
+	.row, .zmi-controls {margin-top: 1.6180rem;}
+	.form-error {margin: 1rem 0;}
+	main.container-fluid > p, main.container-fluid > form {margin-left: 1rem; max-width: 76.013156rem;}
+<dtml-if zope_version_major>
+	.alert {border: 1px solid transparent; margin-bottom: 1rem; margin-top: 1rem; padding: 0.6180rem 1.6180rem;}
+	.alert-danger {background-color: #f8d7da; border-color: #f5c6cb; color: #721c24;}
+	.alert-info {background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460;}
+	.fas.fa-exclamation-triangle::before {content: "▲";}
+	.text-danger {color: #dc3545;}
+<dtml-if "zope_version_major == 2">
+</dtml-if>
+</dtml-if>
+</style>
+
+</main>
+<dtml-var manage_page_footer>

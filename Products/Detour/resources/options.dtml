@@ -1,0 +1,159 @@
+<dtml-var manage_page_header>
+<dtml-var manage_tabs>
+<main class="container-fluid">
+
+	<p class="form-help alert alert-info">
+		The Detour product redirects calls to another object or URL.
+		With default settings, you only need to specify an id for the object and a destination URL.
+		The default settings are: no prefix, 301 status code and no URL truncatating.
+		Please note, that the destination together with the specified prefix must form a full URL, such as "http://www.example.com".
+	</p>
+
+	<dtml-let errors="REQUEST.get('errors', {})">
+	<form action="&dtml-URL1;" method="post" enctype="multipart/form-data" class="zmi-dtml zmi-edit">
+
+		<div class="form-group row">
+			<label for="destination" class="form-label col-sm-3 col-md-2">Destination</label>
+			<div class="col-sm-9 col-md-10">
+				<div class="form-info">
+					Depending on the selected type of prefix below, you must specify as the destination for the redirect either a full URL, a path or nothing at all.
+					<span class="prefix_info" id="prefix_info_none"<dtml-unless "REQUEST.form.get('prefix_type', prefix_type) == 'none'"> hidden</dtml-unless>>The current prefix setting requires you to enter a full URL, starting with "https://" for example.</span>
+					<span class="prefix_info" id="prefix_info_absolute_url"<dtml-unless "REQUEST.form.get('prefix_type', prefix_type) == 'absolute_url'"> hidden</dtml-unless>>The current prefix setting requires you to enter a relative path, such as "path/to/resource".</span>
+					<span class="prefix_info" id="prefix_info_acquired_prefix"<dtml-unless "REQUEST.form.get('prefix_type', prefix_type) == 'acquired_prefix'"> hidden</dtml-unless>>The current prefix setting requires you to enter a relative path, such as "path/to/resource".</span>
+				</div>
+
+				<input type="string" id="destination" name="destination" value="<dtml-var "REQUEST.form.get('destination', destination)">" size="50" class="fw" placeholder="<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'none'">http://www.example.com<dtml-elif "REQUEST.form.get('prefix_type', prefix_type) == 'acquired_prefix'">path/to/destination<dtml-else>path/to/object</dtml-if>">
+				<dtml-if "'destination' in errors"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['destination']"></div></dtml-if>
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="prefix_type_none" class="form-label col-sm-3 col-md-2">Prefix</label>
+			<div class="col-sm-9 col-md-10">
+				<div class="form-info">Please choose one of the following prefix types. If required, a slash ("/") will automatically be inserted between prefix and destination.</div>
+				<dtml-if "'prefix_type' in errors"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['prefix_type']"></div></dtml-if>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="prefix_type_none" name="prefix_type" value="none"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'none'"> checked</dtml-if> onchange="
+
+					document.querySelectorAll('.prefix_info').forEach(function(el){el.setAttribute('hidden', '');});
+
+					document.getElementById('prefix_info_none').removeAttribute('hidden');
+
+					document.getElementById('destination').placeholder = 'https://www.example.com';
+
+					">
+					<label class="form-check-label" for="prefix_type_none">no prefix</label>
+					<div class="form-info">Do not prefix the destination, which must be an absolute URL, such as "http://www.example.com".</div>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="prefix_type_absolute_url" name="prefix_type" value="absolute_url"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'absolute_url'"> checked</dtml-if> onchange="
+
+					document.querySelectorAll('.prefix_info').forEach(function(el){el.setAttribute('hidden', '');});
+
+					document.getElementById('prefix_info_absolute_url').removeAttribute('hidden');
+
+					document.getElementById('destination').placeholder = 'path/to/object';
+
+					">
+					<label class="form-check-label" for="prefix_type_absolute_url">parent's absolute_url method</label>
+					<div class="form-info">The parent object's absolute_url method is used as the prefix ("<dtml-var "aq_parent.absolute_url()">") for the destination, which must be a relative path in the form "path/to/object".</div>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="prefix_type_acquired_prefix" name="prefix_type" value="acquired_prefix"<dtml-if "REQUEST.form.get('prefix_type', prefix_type) == 'acquired_prefix'"> checked</dtml-if> 
+
+					onchange="document.querySelectorAll('.prefix_info').forEach(function(el){el.setAttribute('hidden', '');}); 
+
+					document.getElementById('prefix_info_acquired_prefix').removeAttribute('hidden'); 
+
+					document.getElementById('destination').placeholder = 'path/to/destination';">
+
+					<label class="form-check-label" for="prefix_type_acquired_prefix">acquired prefix:</label>
+					<input type="string" id="acquired_prefix_id" name="acquired_prefix_id" size="25" value="<dtml-var "REQUEST.form.get('acquired_prefix_id', acquired_prefix_id)">" placeholder="property's or callable's id" />
+					<div class="form-info">The specified object is acquired and may be a string or callable returning a string resulting in a URL such as "http://www.example.com/". The destination, which must be a relative path in the form "path/to/object".</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="status_code_301" class="form-label col-sm-3 col-md-2">Status Code</label>
+			<div class="col-sm-9 col-md-10">
+				<div class="form-info">The HTTP status code to use with the redirect. For information, please visit the <a target="_blank" href="https://www.rfc-editor.org/rfc/rfc9110.html#name-redirection-3xx">HTTP Redirection Status Code Definitions</a> as defined in RFC9110.</div>
+				<dtml-if "'status_code' in errors"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['status_code']"></div></dtml-if>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="status_code_308" name="status_code" value="308"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '308'"> checked</dtml-if> onchange="document.getElementById('custom_status_code').value = '308';">
+					<label class="form-check-label" for="status_code_308">308 Permanent Redirect</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="status_code_307" name="status_code" value="307"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '307'"> checked</dtml-if> onchange="document.getElementById('custom_status_code').value = '307';">
+					<label class="form-check-label" for="status_code_307">307 Temporary Redirect</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="status_code_301" name="status_code" value="301"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '301'"> checked</dtml-if> onchange="document.getElementById('custom_status_code').value = '301';">
+					<label class="form-check-label" for="status_code_301">301 Moved Permanently</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="status_code_302" name="status_code" value="302"<dtml-if "REQUEST.form.get('status_code', str(status_code)) == '302'"> checked</dtml-if> onchange="document.getElementById('custom_status_code').value = '302';">
+					<label class="form-check-label" for="status_code_302">302 Moved Temporarily</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="status_code_custom" name="status_code" value="custom"<dtml-if "REQUEST.form.get('status_code', str( status_code)) == 'custom'"> checked</dtml-if>>
+					<label class="form-check-label" for="status_code_custom">Custom Code:</label>
+					<input class="number" type="string" id="custom_status_code" name="custom_status_code" size="6" value="<dtml-var "REQUEST.form.get('custom_status_code', status_code)">">
+					<dtml-if "'custom_status_code' in errors"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['custom_status_code']"></div></dtml-if>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="form-group row">
+			<label for="truncate_url_off" class="form-label col-sm-3 col-md-2">Truncate URL</label>
+			<div class="col-sm-9 col-md-10">
+				<div class="form-info">Unless the URL is truncated, any additional paths and attributes of the call to this Detour object are also appended to the destination URL.</div>
+				<dtml-if "'truncate_url' in errors"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <dtml-var "errors['truncate_url']"></div></dtml-if>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="truncate_url_off" name="truncate_url" value="off"<dtml-if "REQUEST.form.get('truncate_url', truncate_url and 'on' or 'off') == 'off'"> checked</dtml-if>>
+					<label class="form-check-label" for="truncate_url_off">Do not truncate URL</label>
+				</div>
+
+				<div class="form-check">
+					<input class="form-check-input" type="radio" id="truncate_url_on" name="truncate_url" value="on"<dtml-if "REQUEST.form.get('truncate_url', truncate_url and 'on' or 'off') == 'on'"> checked</dtml-if>>
+					<label class="form-check-label" for="truncate_url_on">Truncate URL and discard traverse_subpath</label>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="zmi-controls form-group form-inline">
+			<input class="btn btn-primary" type="submit" name="save_options:method" value="Save Changes" />
+		</div>
+
+	</form>
+	</dtml-let>
+
+<style>
+	.row, .zmi-controls {margin-top: 1.6180rem;}
+	.form-error {margin: 1rem 0;}
+	main.container-fluid > p, main.container-fluid > form {margin-left: 1rem; max-width: 76.013156rem;}
+<dtml-if zope_version_major>
+	.alert {border: 1px solid transparent; margin-bottom: 1rem; margin-top: 1rem; padding: 0.6180rem 1.6180rem;}
+	.alert-danger {background-color: #f8d7da; border-color: #f5c6cb; color: #721c24;}
+	.alert-info {background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460;}
+	.fas.fa-exclamation-triangle::before {content: "▲";}
+	.text-danger {color: #dc3545;}
+<dtml-if "zope_version_major == 2">
+</dtml-if>
+</dtml-if>
+</style>
+
+</main>
+<dtml-var manage_page_footer>

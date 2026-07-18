@@ -1,0 +1,18 @@
+.Detour_icon {
+    display: inline-block;
+    font-size: 1.1rem;
+    line-height: 1em;
+    height: 1em;
+    vertical-align: center;
+    width: 1em;
+}
+
+.Detour_icon::before {
+    background-image: url("/++resource++Detour/icon.svg");
+    background-size: cover;
+    background-position: center;
+    content: "";
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+}

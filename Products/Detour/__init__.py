@@ -29,7 +29,8 @@ MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE
 # Module Imports
 
 
-from Detour import Detour, add_Detour_form, add_Detour
+from Products.Detour.Detour import (
+    Detour, add_and_edit_Detour, add_Detour_form, add_Detour)
 
 
 # =============================================================================
@@ -45,9 +46,11 @@ def initialize(context):
         constructors=(
             ('add_Detour_form', add_Detour_form),
             ('add_Detour', add_Detour),
+            ('add_and_edit_Detour', add_and_edit_Detour),
         ),
         legacy=(
             ('add_Detour', add_Detour),
+            ('add_and_edit_Detour', add_and_edit_Detour),
         ),
-        icon='icon.png',
+        icon='resources/icon.png',
     )

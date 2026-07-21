@@ -1,27 +1,4 @@
-# -*- coding: utf8 -*-
-u"""
-===============================================================================
-
-                       D e t o u r   B a s e   C l a s s
-
-!TXT!
-
-===============================================================================
-Copyright (c) 2007 - 2014, Sebastian Lühnsdorf - Web-Solutions
-For more information see the README.txt file or visit www.zope.biz
-
--------------------------------------------------------------------------------
-This software is subject to the provisions of the Zope Public License,
-Version 2.1 (ZPL).
-
-A copy of the ZPL should accompany this distribution.
-
-THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED WARRANTIES
-ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF TITLE,
-MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE
-
--------------------------------------------------------------------------------
-"""
+"""Detour."""
 
 
 # =============================================================================
@@ -189,8 +166,8 @@ class Detour(SimpleItem, PropertyManager, RoleManager, Historical):
 
     def save_options(
         self, destination='', prefix_type='none', acquired_prefix_id='',
-        status_code=default_status_code, custom_status_code=None, truncate_url=True,
-        REQUEST=None
+        status_code=default_status_code, custom_status_code=None,
+        truncate_url=True, REQUEST=None
     ):
         """Save options."""
         #
@@ -312,8 +289,8 @@ add_Detour_form = DTMLFile(
 
 def add_Detour(
     self, id, title='', destination='https://example.com', prefix_type='none',
-    acquired_prefix_id='', status_code=default_status_code, custom_status_code=None,
-    truncate_url=True, base_url=None, REQUEST=None
+    acquired_prefix_id='', status_code=default_status_code,
+    custom_status_code=None, truncate_url=True, base_url=None, REQUEST=None
 ):
     """ZMI constructor for Detour."""
     # -------------------------------------------------------------------------

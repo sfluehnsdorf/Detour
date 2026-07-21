@@ -1,3 +1,6 @@
+"""Detour."""
+
+
 import zope.component
 import zope.interface
 
